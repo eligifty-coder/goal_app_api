@@ -16,7 +16,7 @@ const asyncWrapper = (fn) => {
 const protect = asyncWrapper(async (req, res, next) => {
    const authHeader = req.headers.authorization
    if (!authHeader || !authHeader.startsWith('Bearer')) {
-      throw new AuthenticateError('Not Authorized')
+      throw new AuthenticateError('Not Authorized, no token')
    }
    const token = authHeader.split(' ')[1]
    if (!token) {
