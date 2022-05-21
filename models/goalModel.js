@@ -1,8 +1,13 @@
 import mongoose from "mongoose";
 const goalSchema = mongoose.Schema({
+   user: {
+      type:mongoose.Schema.Types.ObjectId,
+      required: [true, 'Please provide user'],
+      ref: 'User'
+   },
    text: {
       type: String,
-      reuired:[true, 'Please add a text value']
+      required:[true, 'Please add a text value']
    }
 },
    {
