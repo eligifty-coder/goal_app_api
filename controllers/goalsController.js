@@ -37,16 +37,15 @@ export const updateGoal = asyncWrapper(async (req, res) => {
    // i checked the id of the goal in the url and the id of the user in the token
    const goal = await Goals.findOne({ user: req.user._id, _id:req.params.id })
    
-   const user = await User.findOne({ _id: req.user.id })
-   console.log(user._id.toString())
-   if (!user) {
+
+   if (!req.user) {
       throw new AuthenticateError('User not found')
    }
    if (!req.body.text) {
       throw new BadRequestError('Text cannot be empty')
    }
    // [thinking out loud after debugging for a long time]_id is a mongoose objectId(so,it should always be converted to a string) while id is just a string
-   if (goal.user.toString() !== user._id.toString()) {
+   if (goal.user.toString() !== req.user._id.toString()) {
       throw new AuthenticateError('User not Authorized')
    }
    
@@ -60,9 +59,11 @@ export const deleteGoal = asyncWrapper(async (req, res) => {
    if (!goal) {
       throw new NotFoundError('Goals not found')
    }
-   const user = await User.findOne({ _id: req.user.id })
+   if (!req.user) {
+      throw new NotFoundError('User not found')
+   }
 
-   if (goal.user.toString() !== user._id.toString()) {
+   if (goal.user.toString() !== req.user._id.toString()) {
       throw new AuthenticateError('User not Authorized')
    }
    await Goals.findOneAndRemove({id, user:req.user.id})

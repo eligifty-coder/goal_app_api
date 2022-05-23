@@ -70,7 +70,6 @@ const generateToken = (id) => {
 
 
 export const getMe = asyncWrapper(async (req, res) => {
-   const { id, name, email, } = await User.findOne({_id: req.user.id
-})
-   res.status(200).json({id, name, email})
+   
+   res.status(200).json(req.user)
 })
