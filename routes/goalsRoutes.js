@@ -3,6 +3,6 @@ import { getAllGoals, createGoal, deleteGoal, updateGoal } from '../controllers/
 
 const router = express.Router()
 router.route('/').get(getAllGoals).post(createGoal)
-router.route('/:id').put(updateGoal).delete(deleteGoal)
+router.route('/:id').patch(updateGoal).delete(deleteGoal)
 
 export default router

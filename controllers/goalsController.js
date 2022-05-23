@@ -17,12 +17,12 @@ const asyncWrapper = (fn) => {
 
 
 export const getAllGoals = asyncWrapper(async (req, res) => {
+   console.log(req.user)
    const goals  =  await Goals.find({user:req.user.id})
    res.json(goals)
 })
 export const createGoal = asyncWrapper(async (req, res) => {
    const text = req.body.text
-   console.log(req.body)
    // todo ?  i will put the line of code below in a separate file eg badRequestError.js
    if (!text) {
       throw new BadRequestError('Please add a text fields')
@@ -34,28 +34,35 @@ export const createGoal = asyncWrapper(async (req, res) => {
    res.status(201).json(goal)
 })
 export const updateGoal = asyncWrapper(async (req, res) => {
-   // i checked the id of the goal in the url and the id of the user in the token
-   const goal = await Goals.findOne({ user: req.user._id, _id:req.params.id })
-   
+   const goal = await Goals.findById(req.params.id)
 
+   if (!goal) {
+      res.status(400)
+      throw new Error('Goal not found')
+   }
+
+   // Check for user
    if (!req.user) {
-      throw new AuthenticateError('User not found')
+      res.status(401)
+      throw new Error('User not found')
    }
-   if (!req.body.text) {
-      throw new BadRequestError('Text cannot be empty')
+
+   // Make sure the logged in user matches the goal user
+   if (goal.user.toString() !== req.user.id) {
+      res.status(401)
+      throw new Error('User not authorized')
    }
-   // [thinking out loud after debugging for a long time]_id is a mongoose objectId(so,it should always be converted to a string) while id is just a string
-   if (goal.user.toString() !== req.user._id.toString()) {
-      throw new AuthenticateError('User not Authorized')
-   }
-   
-   const updatedGoal = await Goals.findOneAndUpdate({ id: req.params.id, user: req.user.id }, req.body, { new: true, runValidators: true })
-   res.json(updatedGoal)
+
+   const updatedGoal = await Goal.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+   })
+
+   res.status(200).json(updatedGoal)
 })
 
 export const deleteGoal = asyncWrapper(async (req, res) => {
    const id = req.params.id
-   const goal = await Goals.findOne({id, })
+   const goal = await Goals.findOne({id })
    if (!goal) {
       throw new NotFoundError('Goals not found')
    }
@@ -63,7 +70,7 @@ export const deleteGoal = asyncWrapper(async (req, res) => {
       throw new NotFoundError('User not found')
    }
 
-   if (goal.user.toString() !== req.user._id.toString()) {
+   if (goal.user.toString() !== req.user.id) {
       throw new AuthenticateError('User not Authorized')
    }
    await Goals.findOneAndRemove({id, user:req.user.id})
