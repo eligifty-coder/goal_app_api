@@ -17,7 +17,7 @@ const asyncWrapper = (fn) => {
 
 
 export const getAllGoals = asyncWrapper(async (req, res) => {
-   console.log(req.user)
+   // console.log(req.user)
    const goals  =  await Goals.find({user:req.user.id})
    res.json(goals)
 })
@@ -41,38 +41,47 @@ export const updateGoal = asyncWrapper(async (req, res) => {
       throw new Error('Goal not found')
    }
 
-   // Check for user
    if (!req.user) {
       res.status(401)
       throw new Error('User not found')
    }
 
-   // Make sure the logged in user matches the goal user
+
    if (goal.user.toString() !== req.user.id) {
       res.status(401)
       throw new Error('User not authorized')
    }
 
-   const updatedGoal = await Goal.findByIdAndUpdate(req.params.id, req.body, {
+   const updatedGoal = await Goals.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
    })
+
 
    res.status(200).json(updatedGoal)
 })
 
 export const deleteGoal = asyncWrapper(async (req, res) => {
-   const id = req.params.id
-   const goal = await Goals.findOne({id })
+   const goal = await Goals.findById(req.params.id)
+
    if (!goal) {
-      throw new NotFoundError('Goals not found')
-   }
-   if (!req.user) {
-      throw new NotFoundError('User not found')
+      res.status(400)
+      throw new Error('Goal not found')
    }
 
-   if (goal.user.toString() !== req.user.id) {
-      throw new AuthenticateError('User not Authorized')
+ 
+   if (!req.user) {
+      res.status(401)
+      throw new Error('User not found')
    }
-   await Goals.findOneAndRemove({id, user:req.user.id})
-   res.status(200).json({id})
+
+   
+   if (goal.user.toString() !== req.user.id) {
+      res.status(401)
+      throw new Error('User not authorized')
+   }
+
+   await goal.remove()
+
+   res.status(200).json({ id: req.params.id })
 })
+
