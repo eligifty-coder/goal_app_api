@@ -6,10 +6,13 @@
   "type": "module",
   "scripts": {
     "start": "node app.js",
-    "server": "nodemon app.js"
+    "server": "node app.js"
   },
   "author": "Gift",
   "license": "ISC",
+  "engines": {
+    "node": "14.x"
+  },
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "colors": "^1.4.0",
