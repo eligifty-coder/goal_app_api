@@ -19,12 +19,16 @@ app.use('/api/v1/goals', protect, goalRoutes)
 app.use('/api/v1/users', userRoutes)
 app.use(errorHandler)
 
-app.listen(port, async() => {
+const start = async () => {
    try {
-      await connectDB(process.env.MONGO_URI)
-      console.log(`server started on ${port}`)
+      await connectDB(process.env.MONGO_URI);
+
+      app.listen(port, () =>
+         console.log(`Server is listening on port ${port}...`)
+      );
    } catch (error) {
-      console.log(error)
-      process.exit(1)
+      console.log(error);
    }
-})
+};
+
+start();
